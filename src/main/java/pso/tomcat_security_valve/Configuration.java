@@ -3,8 +3,10 @@ package pso.tomcat_security_valve;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -12,9 +14,10 @@ import java.util.Set;
 public class Configuration {
 	private boolean validateHostName;
 	private Set<String> validHosts = new HashSet<>();
-
+	private Set<String> skipValveForHostNames = new HashSet<>();
+	private Set<String> skipValveForRemoteIps = new HashSet<>();
+	
 	private boolean allowOnlySecureConnections;
-	private Set<String> allowInsecureRemoteIps = new HashSet<>();
 	private boolean redirectInsecureGETRequests;
 
 	private boolean debug;
@@ -24,7 +27,7 @@ public class Configuration {
 	private boolean enableIpRestrictionPerContext;
 	private Map<String, Set<String>> ipRestrictionContext = new HashMap<>();
 
-	private Set<String> skipValveForContexts = new HashSet<>();
+	private ArrayList<String> skipValveForContexts = new ArrayList<>();
 
 	public static Configuration getConfiguration(String fileName) {
 		String catalinaBase=System.getenv("catalina.base");
@@ -51,9 +54,15 @@ public class Configuration {
 			}
 
 			for (int i=0;i<=99;i++) {
-				String ip=prop.getProperty("allowInsecureRemoteIp_"+(i<10?("0"+i):i));
+				String ip=prop.getProperty("skipValveForRemoteIp_"+(i<10?("0"+i):i));
 				if (ip==null || ip.trim().length()==0) continue;
-				c.allowInsecureRemoteIps.add(ip.trim());
+				c.skipValveForRemoteIps.add(ip.trim());
+			}
+			
+			for (int i=0;i<=99;i++) {
+				String skipHostName=prop.getProperty("skipValveForHostName_"+(i<10?("0"+i):i));
+				if (skipHostName==null || skipHostName.trim().length()==0) continue;
+				c.skipValveForHostNames.add(skipHostName);
 			}
 			
 			for (int i=0;i<=99;i++) {
@@ -107,8 +116,8 @@ public class Configuration {
 		return allowOnlySecureConnections;
 	}
 
-	public Set<String> getAllowInsecureRemoteIps() {
-		return allowInsecureRemoteIps;
+	public Set<String> getSkipValveForRemoteIps() {
+		return skipValveForRemoteIps;
 	}
 
 	public boolean isRedirectInsecureGETRequests() {
@@ -135,8 +144,12 @@ public class Configuration {
 		return ipRestrictionContext;
 	}
 
-	public Set<String> getSkipValveForContexts() {
+	public List<String> getSkipValveForContexts() {
 		return skipValveForContexts;
+	}
+
+	public Set<String> getSkipValveForHostNames() {
+		return skipValveForHostNames;
 	}
 
 }
