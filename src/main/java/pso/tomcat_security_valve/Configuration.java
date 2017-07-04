@@ -24,6 +24,8 @@ public class Configuration {
 	private boolean enableIpRestrictionPerContext;
 	private Map<String, Set<String>> ipRestrictionContext = new HashMap<>();
 
+	private Set<String> skipValveForContexts = new HashSet<>();
+
 	public static Configuration getConfiguration(String fileName) {
 		String catalinaBase=System.getenv("catalina.base");
 		if (catalinaBase!=null && fileName.contains("{base}")) {
@@ -42,23 +44,29 @@ public class Configuration {
 
 			input = new FileInputStream(fileName);
 			prop.load(input);
-			for (int i=0;i<99;i++) {
+			for (int i=0;i<=99;i++) {
 				String host=prop.getProperty("validHost_"+(i<10?("0"+i):i));
 				if (host==null || host.trim().length()==0) continue;
 				c.validHosts.add(host.trim());
 			}
 
-			for (int i=0;i<99;i++) {
+			for (int i=0;i<=99;i++) {
 				String ip=prop.getProperty("allowInsecureRemoteIp_"+(i<10?("0"+i):i));
 				if (ip==null || ip.trim().length()==0) continue;
 				c.allowInsecureRemoteIps.add(ip.trim());
+			}
+			
+			for (int i=0;i<=99;i++) {
+				String skipContext=prop.getProperty("skipValveForContext_"+(i<10?("0"+i):i));
+				if (skipContext==null || skipContext.trim().length()==0) continue;
+				c.skipValveForContexts.add(skipContext.trim());
 			}
 
 			c.reloadConfigUrl=prop.getProperty("reloadConfigUrl");
 			if (c.reloadConfigUrl!=null) c.reloadConfigUrl=c.reloadConfigUrl.trim();
 			c.enableReloadConfig=c.reloadConfigUrl==null || c.reloadConfigUrl.isEmpty();
 
-			for (int i=0;i<99;i++) {
+			for (int i=0;i<=99;i++) {
 				String restrictionContext=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i));
 				if (restrictionContext==null || restrictionContext.trim().length()==0) continue;
 
@@ -125,6 +133,10 @@ public class Configuration {
 
 	public Map<String, Set<String>> getIpRestrictionContext() {
 		return ipRestrictionContext;
+	}
+
+	public Set<String> getSkipValveForContexts() {
+		return skipValveForContexts;
 	}
 
 }
