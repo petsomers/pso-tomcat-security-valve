@@ -14,47 +14,16 @@ import org.apache.catalina.valves.ValveBase;
 
 public class IseSecurityValve extends ValveBase {
 	
-	private Set<String> validHosts=new HashSet<String>();
-	private Set<String> allowInsecureRemoteIps=new HashSet<String>();
-	private boolean debug;
-	private boolean onlySecureConnections;
+	private Configuration c;
 	
-	public void setValidHosts(String hosts) {
-		if (hosts==null || hosts.trim().length()==0) {
-			throw new RuntimeException("Error initializing the ISE Security Filter. Init parameter 'validHosts' is not defined.");
-		}
-		String[] hostList=hosts.split(";");
-		for (String host:hostList) {
-			if (host.trim().length()>0) {
-				validHosts.add(host);
-			}
-		}
-		if (validHosts.size()==0) {
-			throw new RuntimeException("Error initializing the ISE Security Filter. Init parameter 'validHosts' is not defined.");
-		}
-	}
-	
-	public void setAllowInsecureRemoteIps(String allowInsecureRemoteIpsStr) {
-		if (allowInsecureRemoteIpsStr!=null && allowInsecureRemoteIpsStr.length()>0) {
-			String[] ipList=allowInsecureRemoteIpsStr.split(";");
-			for (String ip:ipList) {
-				if (ip.trim().length()>0) {
-					allowInsecureRemoteIps.add(ip.trim());
-				}
-			}
-		}
-	}
-
-	public void setDebug(boolean debug) {
-		this.debug=debug;
-	}
-	
-	public void setOnlySecureConnections(boolean onlySecureConnections) {
-		this.onlySecureConnections=onlySecureConnections;
+	public void setConfigFile(String fileName) {
+		c=Configuration.getConfiguration(fileName);
 	}
 	
 	@Override
 	public void invoke(Request request, Response response) throws IOException, ServletException {
+		if (c==null) getNext().invoke(request, response);
+		
 		HttpServletRequest req=(HttpServletRequest)request;
 		HttpServletResponse resp=(HttpServletResponse)response;
 		

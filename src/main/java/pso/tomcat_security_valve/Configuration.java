@@ -1,4 +1,4 @@
-package tomcat_security_valve;
+package pso.tomcat_security_valve;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,63 +10,72 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Configuration {
+	private boolean validateHostName;
 	private Set<String> validHosts = new HashSet<>();
+
+	private boolean allowOnlySecureConnections;
 	private Set<String> allowInsecureRemoteIps = new HashSet<>();
+	private boolean redirectInsecureGETRequests;
+
 	private boolean debug;
-	private boolean onlySecureConnections;
-	private boolean redirectInsecureGetRequests;
+	private boolean enableReloadConfig;
 	private String reloadConfigUrl;
 
-	private Map<String, Set<String>> ipRestrictionForContext = new HashMap<>();
+	private boolean enableIpRestrictionPerContext;
+	private Map<String, Set<String>> ipRestrictionContext = new HashMap<>();
 
 	public static Configuration getConfiguration(String fileName) {
 		String catalinaBase=System.getenv("catalina.base");
-		if (catalinaBase!=null)
+		if (catalinaBase!=null && fileName.contains("{base}")) {
 			fileName=fileName.replace("{base}", catalinaBase);
-		
+		}
+
 		Configuration c=new Configuration();
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
+			c.validateHostName="true".equals(prop.getProperty("validateHostName"));
+			c.debug="true".equals(prop.getProperty("debug"));
+			c.allowOnlySecureConnections="true".equals(prop.getProperty("allowOnlySecureConnections"));
+			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGetRequests"));
+			c.enableIpRestrictionPerContext="true".equals(prop.getProperty("enableIpRestrictionPerContext"));
+
 			input = new FileInputStream(fileName);
 			prop.load(input);
-			String hosts=prop.getProperty("validHosts");
-			if (hosts!=null && hosts.trim().length()>0) {
-				String[] hostList=hosts.split(";");
-				for (String host:hostList) {
-					if (host.trim().length()>0) {
-						c.validHosts.add(host);
-					}
-				}
+			for (int i=0;i<99;i++) {
+				String host=prop.getProperty("validHost_"+(i<10?("0"+i):i));
+				if (host==null || host.trim().length()==0) continue;
+				c.validHosts.add(host.trim());
 			}
-			c.debug="true".equals(prop.getProperty("debug"));
-			c.onlySecureConnections="true".equals(prop.getProperty("onlySecureConnections"));
-			c.redirectInsecureGetRequests="true".equals(prop.getProperty("redirectInsecureGetRequests"));
-			
-			String allowInsecureRemoteIpsStr=prop.getProperty("allowInsecureRemoteIps");
-			if (allowInsecureRemoteIpsStr!=null && allowInsecureRemoteIpsStr.length()>0) {
-				String[] ipList=allowInsecureRemoteIpsStr.split(";");
-				for (String ip:ipList) {
-					if (ip.trim().length()>0) {
-						c.allowInsecureRemoteIps.add(ip.trim());
-					}
-				}
+
+			for (int i=0;i<99;i++) {
+				String ip=prop.getProperty("allowInsecureRemoteIp_"+(i<10?("0"+i):i));
+				if (ip==null || ip.trim().length()==0) continue;
+				c.allowInsecureRemoteIps.add(ip.trim());
 			}
+
 			c.reloadConfigUrl=prop.getProperty("reloadConfigUrl");
-			String ipRestrictionForContextStr=prop.getProperty("ipRestrictionForContext");
-			if (ipRestrictionForContextStr!=null && ipRestrictionForContextStr.length()>0) {
-				String[] settingList=ipRestrictionForContextStr.split(";");
-				for (String setting:settingList) {
-					if (setting.trim().length()>0 && setting.contains(":")) {
-						String[] settingItem=ipRestrictionForContextStr.split(":");
-						
-					}
+			if (c.reloadConfigUrl!=null) c.reloadConfigUrl=c.reloadConfigUrl.trim();
+			c.enableReloadConfig=c.reloadConfigUrl==null || c.reloadConfigUrl.isEmpty();
+
+			for (int i=0;i<99;i++) {
+				String restrictionContext=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i));
+				if (restrictionContext==null || restrictionContext.trim().length()==0) continue;
+
+				HashSet<String> ipSet=new HashSet<>();
+				c.ipRestrictionContext.put(restrictionContext, ipSet);
+				String ipStr=prop.getProperty("ipRestrictionContext."+restrictionContext);
+				if (ipStr==null || ipStr.length()==0) continue;
+				String[] ips=ipStr.split(";");
+				for (int j=0;j<ips.length;j++) {
+					String ip=ips[j].trim();
+					if (!ip.isEmpty()) ipSet.add(ip);
 				}
 			}
-			
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			throw new RuntimeException("Error starting ise-web-security valve "+ex.getMessage(), ex);
+			throw new RuntimeException("Error loading config for pso-tomcat-security-valve "+ex.getMessage(), ex);
 		} finally {
 			if (input != null) {
 				try {
@@ -77,6 +86,45 @@ public class Configuration {
 		}
 		return c;
 	}
-		
+
+	public boolean isValidateHostName() {
+		return validateHostName;
+	}
+
+	public Set<String> getValidHosts() {
+		return validHosts;
+	}
+
+	public boolean isAllowOnlySecureConnections() {
+		return allowOnlySecureConnections;
+	}
+
+	public Set<String> getAllowInsecureRemoteIps() {
+		return allowInsecureRemoteIps;
+	}
+
+	public boolean isRedirectInsecureGETRequests() {
+		return redirectInsecureGETRequests;
+	}
+
+	public boolean isDebug() {
+		return debug;
+	}
+
+	public boolean isEnableReloadConfig() {
+		return enableReloadConfig;
+	}
 	
+	public String getReloadConfigUrl() {
+		return reloadConfigUrl;
+	}
+
+	public boolean isEnableIpRestrictionPerContext() {
+		return enableIpRestrictionPerContext;
+	}
+
+	public Map<String, Set<String>> getIpRestrictionContext() {
+		return ipRestrictionContext;
+	}
+
 }
