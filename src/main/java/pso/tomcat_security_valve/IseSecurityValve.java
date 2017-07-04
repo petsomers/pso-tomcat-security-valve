@@ -52,8 +52,8 @@ public class IseSecurityValve extends ValveBase {
 			if (c.isDebug()) {
 				System.out.println("pso-tomcat-security-valve: Blocking invalid host name '"+serverName+"'");
 			}
-			resp.getWriter().print("Invalid host name."); // 200
-			// resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid host name."); // 404
+			resp.getWriter().print(c.getInvalidHostNameMessage()); // 200
+			// resp.sendError(HttpServletResponse.SC_NOT_FOUND, c.getInvalidHostNameMessage()); // 404
 			return;
 		}
 		
@@ -71,13 +71,11 @@ public class IseSecurityValve extends ValveBase {
 				resp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 				resp.sendRedirect("https://"+serverName+requestURI+queryString);
 			} else {
-				resp.getWriter().print("Only secure connections are allowed. Please use https.");	
+				resp.getWriter().print(c.getOnlySecurityConnectionsAllowedMessage());	
 			}
 			return;
 		}
-
 		getNext().invoke(request, response);
-		
 	}
 	
 	@Override

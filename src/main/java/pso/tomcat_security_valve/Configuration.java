@@ -28,6 +28,9 @@ public class Configuration {
 	private Map<String, Set<String>> ipRestrictionContext = new HashMap<>();
 
 	private ArrayList<String> skipValveForContexts = new ArrayList<>();
+	
+	private String invalidHostNameMessage="Invalid host name.";
+	private String onlySecurityConnectionsAllowedMessage="Only secure connections are allowed. Please use https.";
 
 	public static Configuration getConfiguration(String fileName) {
 		String catalinaBase=System.getenv("catalina.base");
@@ -89,6 +92,11 @@ public class Configuration {
 					if (!ip.isEmpty()) ipSet.add(ip);
 				}
 			}
+			if (prop.getProperty("invalidHostNameMessage")!=null) 
+				c.invalidHostNameMessage=prop.getProperty("invalidHostNameMessage");
+			if (prop.getProperty("onlySecurityConnectionsAllowedMessage")!=null) 
+				c.onlySecurityConnectionsAllowedMessage=prop.getProperty("onlySecurityConnectionsAllowedMessage");
+			
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -150,6 +158,14 @@ public class Configuration {
 
 	public Set<String> getSkipValveForHostNames() {
 		return skipValveForHostNames;
+	}
+
+	public String getInvalidHostNameMessage() {
+		return invalidHostNameMessage;
+	}
+
+	public String getOnlySecurityConnectionsAllowedMessage() {
+		return onlySecurityConnectionsAllowedMessage;
 	}
 
 }
