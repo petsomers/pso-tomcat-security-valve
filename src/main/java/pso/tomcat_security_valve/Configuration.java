@@ -42,14 +42,14 @@ public class Configuration {
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
+			input = new FileInputStream(fileName);
+			prop.load(input);
 			c.validateHostName="true".equals(prop.getProperty("validateHostName"));
 			c.debug="true".equals(prop.getProperty("debug"));
 			c.allowOnlySecureConnections="true".equals(prop.getProperty("allowOnlySecureConnections"));
 			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGetRequests"));
 			c.enableIpRestrictionPerContext="true".equals(prop.getProperty("enableIpRestrictionPerContext"));
 
-			input = new FileInputStream(fileName);
-			prop.load(input);
 			for (int i=0;i<=99;i++) {
 				String host=prop.getProperty("validHost_"+(i<10?("0"+i):i));
 				if (host==null || host.trim().length()==0) continue;
