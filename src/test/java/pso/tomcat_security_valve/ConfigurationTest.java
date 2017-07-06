@@ -16,6 +16,9 @@ public class ConfigurationTest {
 		assertTrue(conf.getSkipValveForRemoteIps().contains("192.168.1.41"));
 		assertTrue(conf.getValidHosts().contains("www.example2.com"));
 		assertTrue(conf.isAllowOnlySecureConnections());
+		assertTrue(conf.isRedirectInsecureGETRequests());
+		assertEquals("max-age=31536000; includeSubDomains; preload", conf.getSTSParameters());
+		assertTrue(conf.isEnableSTS());
 		assertEquals("/reload_security_valve_config", conf.getReloadConfigUrl());
 		assertEquals("Invalid host name.", conf.getInvalidHostNameMessage());
 	}

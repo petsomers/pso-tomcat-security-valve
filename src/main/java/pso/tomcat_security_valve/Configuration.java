@@ -49,7 +49,7 @@ public class Configuration {
 			c.validateHostName="true".equals(prop.getProperty("validateHostName"));
 			c.debug="true".equals(prop.getProperty("debug"));
 			c.allowOnlySecureConnections="true".equals(prop.getProperty("allowOnlySecureConnections"));
-			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGetRequests"));
+			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGETRequests"));
 			c.enableIpRestrictionPerContext="true".equals(prop.getProperty("enableIpRestrictionPerContext"));
 			c.enableReloadConfig="true".equals(prop.getProperty("enableReloadConfig"));
 			c.enableSTS="true".equals(prop.getProperty("enableSTS"));
@@ -178,7 +178,7 @@ public class Configuration {
 		return enableSTS;
 	}
 
-	public String getsTSParameters() {
+	public String getSTSParameters() {
 		return sTSParameters;
 	}
 

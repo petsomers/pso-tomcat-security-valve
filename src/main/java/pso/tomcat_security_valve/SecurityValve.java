@@ -79,7 +79,7 @@ public class SecurityValve extends ValveBase {
 					queryString="";
 				}
 				if (c.isEnableSTS()) {
-					resp.setHeader("Strict-Transport-Security", c.getsTSParameters());
+					resp.setHeader("Strict-Transport-Security", c.getSTSParameters());
 				}
 				resp.sendRedirect("https://"+serverName+requestURI+queryString);
 			} else {
