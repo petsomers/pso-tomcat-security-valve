@@ -9,6 +9,7 @@ public class ConfigurationTest {
 	@Test
 	public void testConfigurationLoader() {
 		Configuration conf=Configuration.getConfiguration("src/test/resources/config_example1.properties");
+		assertTrue(conf.isEnableReloadConfig());
 		assertEquals("/reload_security_valve_config", conf.getReloadConfigUrl());
 		assertEquals(2, conf.getSkipValveForHostNames().size());
 		assertTrue(conf.getSkipValveForHostNames().contains("localhost"));

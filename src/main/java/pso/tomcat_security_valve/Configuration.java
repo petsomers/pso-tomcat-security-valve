@@ -51,6 +51,7 @@ public class Configuration {
 			c.allowOnlySecureConnections="true".equals(prop.getProperty("allowOnlySecureConnections"));
 			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGetRequests"));
 			c.enableIpRestrictionPerContext="true".equals(prop.getProperty("enableIpRestrictionPerContext"));
+			c.enableReloadConfig="true".equals(prop.getProperty("enableReloadConfig"));
 			c.enableSTS="true".equals(prop.getProperty("enableSTS"));
 			c.sTSParameters=prop.getProperty("STSParameters");
 			if (c.sTSParameters==null) c.sTSParameters="max-age=31536000; includeSubDomains; preload";
@@ -81,7 +82,7 @@ public class Configuration {
 
 			c.reloadConfigUrl=prop.getProperty("reloadConfigUrl");
 			if (c.reloadConfigUrl!=null) c.reloadConfigUrl=c.reloadConfigUrl.trim();
-			c.enableReloadConfig=c.reloadConfigUrl==null || c.reloadConfigUrl.isEmpty();
+			c.enableReloadConfig=c.enableReloadConfig && (c.reloadConfigUrl!=null || !c.reloadConfigUrl.isEmpty());
 
 			for (int i=0;i<=99;i++) {
 				String restrictionContext=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i));
