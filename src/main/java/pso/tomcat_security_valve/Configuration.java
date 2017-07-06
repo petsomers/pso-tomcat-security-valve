@@ -34,10 +34,6 @@ public class Configuration {
 	private String onlySecurityConnectionsAllowedMessage="Only secure connections are allowed. Please use https.";
 
 	public static Configuration getConfiguration(String fileName) {
-		String catalinaBase=System.getenv("catalina.base");
-		if (catalinaBase!=null && fileName.contains("{base}")) {
-			fileName=fileName.replace("{base}", catalinaBase);
-		}
 		File f=new File(fileName);
 		if (!f.exists() || f.isDirectory()) {
 			throw new RuntimeException("pso-tomcat-security-valve: config file does not exist "+fileName);

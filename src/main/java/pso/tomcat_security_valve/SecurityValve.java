@@ -10,7 +10,7 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
 
-public class IseSecurityValve extends ValveBase {
+public class SecurityValve extends ValveBase {
 	
 	private Configuration c;
 	private String fileName;
@@ -26,7 +26,6 @@ public class IseSecurityValve extends ValveBase {
 			getNext().invoke(request, response);
 			return;
 		}
-		
 		HttpServletRequest req=(HttpServletRequest)request;
 		HttpServletResponse resp=(HttpServletResponse)response;
 		String requestURI=req.getRequestURI();
