@@ -78,7 +78,9 @@ public class SecurityValve extends ValveBase {
 				} else {
 					queryString="";
 				}
-				resp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+				if (c.isEnableSTS()) {
+					resp.setHeader("Strict-Transport-Security", c.getsTSParameters());
+				}
 				resp.sendRedirect("https://"+serverName+requestURI+queryString);
 			} else {
 				resp.getWriter().print(c.getOnlySecurityConnectionsAllowedMessage());	

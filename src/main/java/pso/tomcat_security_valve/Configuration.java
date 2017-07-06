@@ -20,7 +20,9 @@ public class Configuration {
 	
 	private boolean allowOnlySecureConnections;
 	private boolean redirectInsecureGETRequests;
-
+	private boolean enableSTS;
+	private String sTSParameters;
+	
 	private boolean debug;
 	private boolean enableReloadConfig;
 	private String reloadConfigUrl;
@@ -49,6 +51,9 @@ public class Configuration {
 			c.allowOnlySecureConnections="true".equals(prop.getProperty("allowOnlySecureConnections"));
 			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGetRequests"));
 			c.enableIpRestrictionPerContext="true".equals(prop.getProperty("enableIpRestrictionPerContext"));
+			c.enableSTS="true".equals(prop.getProperty("enableSTS"));
+			c.sTSParameters=prop.getProperty("STSParameters");
+			if (c.sTSParameters==null) c.sTSParameters="max-age=31536000; includeSubDomains; preload";
 
 			for (int i=0;i<=99;i++) {
 				String host=prop.getProperty("validHost_"+(i<10?("0"+i):i));
@@ -166,6 +171,14 @@ public class Configuration {
 
 	public String getOnlySecurityConnectionsAllowedMessage() {
 		return onlySecurityConnectionsAllowedMessage;
+	}
+
+	public boolean isEnableSTS() {
+		return enableSTS;
+	}
+
+	public String getsTSParameters() {
+		return sTSParameters;
 	}
 
 }
