@@ -1,5 +1,6 @@
 package pso.tomcat_security_valve;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,12 +38,15 @@ public class Configuration {
 		if (catalinaBase!=null && fileName.contains("{base}")) {
 			fileName=fileName.replace("{base}", catalinaBase);
 		}
-
+		File f=new File(fileName);
+		if (!f.exists() || f.isDirectory()) {
+			throw new RuntimeException("pso-tomcat-security-valve: config file does not exist "+fileName);
+		}
 		Configuration c=new Configuration();
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
-			input = new FileInputStream(fileName);
+			input = new FileInputStream(f);
 			prop.load(input);
 			c.validateHostName="true".equals(prop.getProperty("validateHostName"));
 			c.debug="true".equals(prop.getProperty("debug"));
@@ -100,7 +104,7 @@ public class Configuration {
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			throw new RuntimeException("Error loading config for pso-tomcat-security-valve "+ex.getMessage(), ex);
+			throw new RuntimeException("pso-tomcat-security-valve: Error loading config file "+ex.getMessage(), ex);
 		} finally {
 			if (input != null) {
 				try {

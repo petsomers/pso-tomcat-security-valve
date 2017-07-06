@@ -13,8 +13,10 @@ import org.apache.catalina.valves.ValveBase;
 public class IseSecurityValve extends ValveBase {
 	
 	private Configuration c;
+	private String fileName;
 	
 	public void setConfigFile(String fileName) {
+		this.fileName=fileName;
 		c=Configuration.getConfiguration(fileName);
 	}
 	
@@ -29,13 +31,22 @@ public class IseSecurityValve extends ValveBase {
 		HttpServletResponse resp=(HttpServletResponse)response;
 		String requestURI=req.getRequestURI();
 		String serverName=req.getServerName();
+		String remoteAddr=req.getRemoteAddr();
+		
+		if (c.isEnableReloadConfig()) {
+			if (requestURI.equals(c.getReloadConfigUrl())) {
+				System.err.println("pso-tomcat-security-valve: reloading config. Request by ip: "+remoteAddr);
+				c=Configuration.getConfiguration(fileName);
+				resp.getWriter().print("pso-tomcat-security-valve: config reloaded.");
+				return;
+			}
+		}
 		
 		if (c.getSkipValveForHostNames().contains(serverName)) {
 			getNext().invoke(request, response);
 			return;
 		}
 		
-		String remoteAddr=req.getRemoteAddr();
 		if (c.getSkipValveForRemoteIps().contains(remoteAddr)) {
 			getNext().invoke(request, response);
 			return;
@@ -58,7 +69,7 @@ public class IseSecurityValve extends ValveBase {
 		}
 		
 		if (c.isAllowOnlySecureConnections() && !req.isSecure()) {
-			if (req.getMethod().equals("GET") && c.isRedirectInsecureGETRequests()) {
+			if (c.isRedirectInsecureGETRequests() && req.getMethod().equals("GET")) {
 				if (requestURI==null || requestURI.trim().length()==0) {
 					requestURI="/";
 				}
