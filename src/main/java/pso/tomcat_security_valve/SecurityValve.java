@@ -60,13 +60,25 @@ public class SecurityValve extends ValveBase {
 		
 		if (!c.getValidHosts().contains(serverName)) {
 			if (c.isDebug()) {
-				System.out.println("pso-tomcat-security-valve: Blocking invalid host name '"+serverName+"'");
+				System.out.println("pso-tomcat-security-valve: Blocking invalid host name '"+serverName.substring(0,20)+"'");
 			}
 			resp.getWriter().print(c.getInvalidHostNameMessage()); // 200
 			// resp.sendError(HttpServletResponse.SC_NOT_FOUND, c.getInvalidHostNameMessage()); // 404
 			return;
 		}
 		
+		if (c.isEnableIpRestrictedContexts()) {
+			for (String ctx:c.getIpRestrictedContexts()) {
+				if (requestURI.startsWith(ctx)) {
+					if (!c.getIpRestrictedContextMap().get(ctx).contains(remoteAddr)) {
+						resp.sendError(c.getIpRestrictedContextResponseCode());
+						return;
+					}
+					break;
+				}
+			}
+		}
+
 		if (c.isAllowOnlySecureConnections() && !req.isSecure()) {
 			if (c.isRedirectInsecureGETRequests() && req.getMethod().equals("GET")) {
 				if (requestURI==null || requestURI.trim().length()==0) {

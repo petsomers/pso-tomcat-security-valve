@@ -27,9 +27,10 @@ public class Configuration {
 	private boolean enableReloadConfig;
 	private String reloadConfigUrl;
 
-	private boolean enableIpRestrictionPerContext;
-	private Map<String, Set<String>> ipRestrictionContext = new HashMap<>();
-	private int ipRestrictionPerContextResponseCode;
+	private boolean enableIpRestrictedContexts;
+	private ArrayList<String> ipRestrictedContexts=new ArrayList<>();
+	private Map<String, Set<String>> ipRestrictedContextMap = new HashMap<>();
+	private int ipRestrictedContextResponseCode;
 
 	private ArrayList<String> skipValveForContexts = new ArrayList<>();
 	
@@ -51,7 +52,7 @@ public class Configuration {
 			c.debug="true".equals(prop.getProperty("debug"));
 			c.allowOnlySecureConnections="true".equals(prop.getProperty("allowOnlySecureConnections"));
 			c.redirectInsecureGETRequests="true".equals(prop.getProperty("redirectInsecureGETRequests"));
-			c.enableIpRestrictionPerContext="true".equals(prop.getProperty("enableIpRestrictionPerContext"));
+			c.enableIpRestrictedContexts="true".equals(prop.getProperty("enableIpRestrictedContexts"));
 			c.enableReloadConfig="true".equals(prop.getProperty("enableReloadConfig"));
 			c.enableSTS="true".equals(prop.getProperty("enableSTS"));
 			c.sTSParameters=prop.getProperty("STSParameters");
@@ -85,30 +86,34 @@ public class Configuration {
 			if (c.reloadConfigUrl!=null) c.reloadConfigUrl=c.reloadConfigUrl.trim();
 			c.enableReloadConfig=c.enableReloadConfig && (c.reloadConfigUrl!=null || !c.reloadConfigUrl.isEmpty());
 
-			if (c.enableIpRestrictionPerContext) {
+			if (c.enableIpRestrictedContexts) {
 				for (int i=0;i<=99;i++) {
-					String restrictionContext=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i));
+					String restrictionContext=prop.getProperty("ipRestrictedContext_"+(i<10?("0"+i):i));
 					if (restrictionContext==null || restrictionContext.trim().length()==0) continue;
 	
 					HashSet<String> ipSet=new HashSet<>();
-					c.ipRestrictionContext.put(restrictionContext, ipSet);
+					c.ipRestrictedContextMap.put(restrictionContext, ipSet);
+					c.ipRestrictedContexts.add(restrictionContext);
 					for (int j=0;j<=99;j++) {
-						String ipStr=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i)+"_IP_"+(j<10?("0"+j):j));
+						String ipStr=prop.getProperty("ipRestrictedContext_"+(i<10?("0"+i):i)+"_IP_"+(j<10?("0"+j):j));
 						if (ipStr!=null && !ipStr.isEmpty()) {
 							ipSet.add(ipStr);
 						}
 					}
 				}
-				String responseCode=prop.getProperty("ipRestrictionPerContextResponseCode");
+				// sort descending 
+				// forces to check deeper contexts prior to higher level contexts.
+				c.ipRestrictedContexts.sort((s1,s2) -> s2.compareTo(s1));
+				String responseCode=prop.getProperty("ipRestrictedContextResponseCode");
 				if (responseCode!=null && !responseCode.isEmpty()) {
 					try {
-						c.ipRestrictionPerContextResponseCode=Integer.parseInt(responseCode);
+						c.ipRestrictedContextResponseCode=Integer.parseInt(responseCode);
 					} catch (NumberFormatException nfe) {
 						System.out.println("pso-tomcat-security-valve: invalid number format for ipRestrictionPerContextResponseCode ("+responseCode+"). Using 403 instead.");
-						c.ipRestrictionPerContextResponseCode=403;	
+						c.ipRestrictedContextResponseCode=403;	
 					}
 				} else {
-					c.ipRestrictionPerContextResponseCode=403;
+					c.ipRestrictedContextResponseCode=403;
 				}
 			}
 			if (prop.getProperty("invalidHostNameMessage")!=null) 
@@ -163,12 +168,12 @@ public class Configuration {
 		return reloadConfigUrl;
 	}
 
-	public boolean isEnableIpRestrictionPerContext() {
-		return enableIpRestrictionPerContext;
+	public boolean isEnableIpRestrictedContexts() {
+		return enableIpRestrictedContexts;
 	}
 
-	public Map<String, Set<String>> getIpRestrictionContext() {
-		return ipRestrictionContext;
+	public Map<String, Set<String>> getIpRestrictedContextMap() {
+		return ipRestrictedContextMap;
 	}
 
 	public List<String> getSkipValveForContexts() {
@@ -195,8 +200,12 @@ public class Configuration {
 		return sTSParameters;
 	}
 
-	public int getIpRestrictionPerContextResponseCode() {
-		return ipRestrictionPerContextResponseCode;
+	public int getIpRestrictedContextResponseCode() {
+		return ipRestrictedContextResponseCode;
+	}
+
+	public ArrayList<String> getIpRestrictedContexts() {
+		return ipRestrictedContexts;
 	}
 
 }
