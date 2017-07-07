@@ -84,18 +84,19 @@ public class Configuration {
 			if (c.reloadConfigUrl!=null) c.reloadConfigUrl=c.reloadConfigUrl.trim();
 			c.enableReloadConfig=c.enableReloadConfig && (c.reloadConfigUrl!=null || !c.reloadConfigUrl.isEmpty());
 
-			for (int i=0;i<=99;i++) {
-				String restrictionContext=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i));
-				if (restrictionContext==null || restrictionContext.trim().length()==0) continue;
-
-				HashSet<String> ipSet=new HashSet<>();
-				c.ipRestrictionContext.put(restrictionContext, ipSet);
-				String ipStr=prop.getProperty("ipRestrictionContext."+restrictionContext);
-				if (ipStr==null || ipStr.length()==0) continue;
-				String[] ips=ipStr.split(";");
-				for (int j=0;j<ips.length;j++) {
-					String ip=ips[j].trim();
-					if (!ip.isEmpty()) ipSet.add(ip);
+			if (c.enableIpRestrictionPerContext) {
+				for (int i=0;i<=99;i++) {
+					String restrictionContext=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i));
+					if (restrictionContext==null || restrictionContext.trim().length()==0) continue;
+	
+					HashSet<String> ipSet=new HashSet<>();
+					c.ipRestrictionContext.put(restrictionContext, ipSet);
+					for (int j=0;i<=99;j++) {
+						String ipStr=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i)+"_IP_"+(j<10?("0"+j):j));
+						if (ipStr!=null && ipStr.isEmpty()) {
+							ipSet.add(ipStr);
+						}
+					}
 				}
 			}
 			if (prop.getProperty("invalidHostNameMessage")!=null) 
