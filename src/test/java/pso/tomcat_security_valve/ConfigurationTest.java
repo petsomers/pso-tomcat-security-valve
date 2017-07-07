@@ -21,6 +21,9 @@ public class ConfigurationTest {
 		assertTrue(conf.isEnableSTS());
 		assertEquals("/reload_security_valve_config", conf.getReloadConfigUrl());
 		assertEquals("Invalid host name.", conf.getInvalidHostNameMessage());
+		assertTrue(conf.isEnableIpRestrictionPerContext());
+		assertTrue(conf.getIpRestrictionContext().containsKey("/probe-2.4.0"));
+		assertTrue(conf.getIpRestrictionContext().get("/probe-2.4.0").contains("192.168.1.2"));
 	}
 
 }

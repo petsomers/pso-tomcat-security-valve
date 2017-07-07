@@ -91,9 +91,9 @@ public class Configuration {
 	
 					HashSet<String> ipSet=new HashSet<>();
 					c.ipRestrictionContext.put(restrictionContext, ipSet);
-					for (int j=0;i<=99;j++) {
+					for (int j=0;j<=99;j++) {
 						String ipStr=prop.getProperty("ipRestrictionContext_"+(i<10?("0"+i):i)+"_IP_"+(j<10?("0"+j):j));
-						if (ipStr!=null && ipStr.isEmpty()) {
+						if (ipStr!=null && !ipStr.isEmpty()) {
 							ipSet.add(ipStr);
 						}
 					}
