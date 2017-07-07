@@ -29,6 +29,7 @@ public class Configuration {
 
 	private boolean enableIpRestrictionPerContext;
 	private Map<String, Set<String>> ipRestrictionContext = new HashMap<>();
+	private int ipRestrictionPerContextResponseCode;
 
 	private ArrayList<String> skipValveForContexts = new ArrayList<>();
 	
@@ -97,6 +98,17 @@ public class Configuration {
 							ipSet.add(ipStr);
 						}
 					}
+				}
+				String responseCode=prop.getProperty("ipRestrictionPerContextResponseCode");
+				if (responseCode!=null && !responseCode.isEmpty()) {
+					try {
+						c.ipRestrictionPerContextResponseCode=Integer.parseInt(responseCode);
+					} catch (NumberFormatException nfe) {
+						System.out.println("pso-tomcat-security-valve: invalid number format for ipRestrictionPerContextResponseCode ("+responseCode+"). Using 403 instead.");
+						c.ipRestrictionPerContextResponseCode=403;	
+					}
+				} else {
+					c.ipRestrictionPerContextResponseCode=403;
 				}
 			}
 			if (prop.getProperty("invalidHostNameMessage")!=null) 
@@ -181,6 +193,10 @@ public class Configuration {
 
 	public String getSTSParameters() {
 		return sTSParameters;
+	}
+
+	public int getIpRestrictionPerContextResponseCode() {
+		return ipRestrictionPerContextResponseCode;
 	}
 
 }
