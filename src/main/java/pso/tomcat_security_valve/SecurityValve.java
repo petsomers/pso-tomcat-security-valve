@@ -60,7 +60,7 @@ public class SecurityValve extends ValveBase {
 		
 		if (!c.getValidHosts().contains(serverName)) {
 			if (c.isDebug()) {
-				System.out.println("pso-tomcat-security-valve: Blocking invalid host name '"+serverName.substring(0,20)+"'");
+				System.out.println("pso-tomcat-security-valve: Blocking invalid host name '"+serverName.substring(0,200)+"'");
 			}
 			resp.getWriter().print(c.getInvalidHostNameMessage()); // 200
 			// resp.sendError(HttpServletResponse.SC_NOT_FOUND, c.getInvalidHostNameMessage()); // 404
