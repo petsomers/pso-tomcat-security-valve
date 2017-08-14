@@ -12,11 +12,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import pso.tomcat_security_valve.model.HeaderValue;
+
 public class Configuration {
 	private boolean validateHostName;
 	private Set<String> validHosts = new HashSet<>();
 	private Set<String> skipValveForHostNames = new HashSet<>();
 	private Set<String> skipValveForRemoteIps = new HashSet<>();
+	private ArrayList<String> skipValveForContexts = new ArrayList<>();
 	
 	private boolean allowOnlySecureConnections;
 	private boolean redirectInsecureGETRequests;
@@ -28,11 +31,12 @@ public class Configuration {
 	private String reloadConfigUrl;
 
 	private boolean enableIpRestrictedContexts;
-	private ArrayList<String> ipRestrictedContexts=new ArrayList<>();
+	private List<String> ipRestrictedContexts=new ArrayList<>();
 	private Map<String, Set<String>> ipRestrictedContextMap = new HashMap<>();
 	private int ipRestrictedContextResponseCode;
 
-	private ArrayList<String> skipValveForContexts = new ArrayList<>();
+	private List<String> addHeaderContexts=new ArrayList<>();
+	private Map<String, List<HeaderValue>> addHeadersForContext = new HashMap<>();
 	
 	private String invalidHostNameMessage="Invalid host name.";
 	private String onlySecurityConnectionsAllowedMessage="Only secure connections are allowed. Please use https.";
@@ -116,6 +120,25 @@ public class Configuration {
 					c.ipRestrictedContextResponseCode=403;
 				}
 			}
+			for (int i=0;i<=99;i++) {
+				String addHeadersForContext=prop.getProperty("addHeadersForContext_"+(i<10?("0"+i):i));
+				if (addHeadersForContext==null || addHeadersForContext.trim().length()==0) continue;
+				ArrayList<HeaderValue> headers=new ArrayList<>();
+				for (int j=0;j<=99;j++) {
+					String header=prop.getProperty("addHeadersForContext_"+(i<10?("0"+i):i)+"_header_"+(j<10?("0"+j):j));
+					if (header!=null && header.trim().length()>0) {
+						String value=prop.getProperty("addHeadersForContext_"+(i<10?("0"+i):i)+"_value_"+(j<10?("0"+j):j));
+						if (value==null) value="";
+						headers.add(new HeaderValue(header, value));
+					}
+				}
+				c.addHeaderContexts.add(addHeadersForContext);
+				c.addHeadersForContext.put(addHeadersForContext, headers);
+			}
+			// sort descending 
+			// forces to check deeper contexts prior to higher level contexts.
+			c.addHeaderContexts.sort((s1,s2) -> s2.compareTo(s1));
+			
 			if (prop.getProperty("invalidHostNameMessage")!=null) 
 				c.invalidHostNameMessage=prop.getProperty("invalidHostNameMessage");
 			if (prop.getProperty("onlySecurityConnectionsAllowedMessage")!=null) 
@@ -204,8 +227,16 @@ public class Configuration {
 		return ipRestrictedContextResponseCode;
 	}
 
-	public ArrayList<String> getIpRestrictedContexts() {
+	public List<String> getIpRestrictedContexts() {
 		return ipRestrictedContexts;
+	}
+
+	public Map<String, List<HeaderValue>> getAddHeadersForContext() {
+		return addHeadersForContext;
+	}
+
+	public List<String> getAddHeaderContexts() {
+		return addHeaderContexts;
 	}
 
 }

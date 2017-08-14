@@ -26,6 +26,8 @@ public class ConfigurationTest {
 		assertTrue(conf.getIpRestrictedContextMap().get("/probe-2.4.0").contains("192.168.1.2"));
 		assertEquals("/probe-2.4.0/admin", conf.getIpRestrictedContexts().get(0));
 		assertEquals(conf.getIpRestrictedContextResponseCode(),404);
+		assertTrue(conf.getAddHeaderContexts().contains("/iframe_context"));
+		assertEquals("Content-Security-Policy",conf.getAddHeadersForContext().get("/iframe_context").get(0).getHeader());
 	}
 
 }
