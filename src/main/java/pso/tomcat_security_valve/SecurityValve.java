@@ -32,6 +32,10 @@ public class SecurityValve extends ValveBase {
 		HttpServletRequest req=(HttpServletRequest)request;
 		HttpServletResponse resp=(HttpServletResponse)response;
 		String requestURI=req.getRequestURI();
+		if (requestURI==null || requestURI.trim().length()==0) {
+			// this is likely a plain socket connection
+			requestURI="/";
+		}
 		String serverName=req.getServerName();
 		String remoteAddr=req.getRemoteAddr();
 		
