@@ -1,6 +1,7 @@
 package pso.tomcat_security_valve;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
+
+import pso.tomcat_security_valve.model.HeaderValue;
 
 public class SecurityValve extends ValveBase {
 	
@@ -29,6 +32,10 @@ public class SecurityValve extends ValveBase {
 		HttpServletRequest req=(HttpServletRequest)request;
 		HttpServletResponse resp=(HttpServletResponse)response;
 		String requestURI=req.getRequestURI();
+		if (requestURI==null || requestURI.trim().length()==0) {
+			// this is likely a plain socket connection
+			requestURI="/";
+		}
 		String serverName=req.getServerName();
 		String remoteAddr=req.getRemoteAddr();
 		
@@ -75,6 +82,16 @@ public class SecurityValve extends ValveBase {
 						return;
 					}
 					break;
+				}
+			}
+		}
+		
+		if (c.getAddHeaderContexts().size()>0) {
+			for (String ctx:c.getAddHeaderContexts()) {
+				if (requestURI.startsWith(ctx)) {
+					for (HeaderValue h:c.getAddHeadersForContext().get(ctx)) {
+						resp.addHeader(h.getHeader(), h.getValue());
+					}
 				}
 			}
 		}
