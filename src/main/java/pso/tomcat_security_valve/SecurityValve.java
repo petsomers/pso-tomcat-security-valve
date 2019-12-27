@@ -96,6 +96,12 @@ public class SecurityValve extends ValveBase {
 			}
 		}
 
+		if (c.isEnableSTS()) {
+			if (!c.isSTSHttpOnly() || !req.isSecure()) {
+				resp.setHeader("Strict-Transport-Security", c.getSTSParameters());
+			}
+		}
+
 		if (c.isAllowOnlySecureConnections() && !req.isSecure()) {
 			if (c.isRedirectInsecureGETRequests() && req.getMethod().equals("GET")) {
 				if (requestURI==null || requestURI.trim().length()==0) {
@@ -106,9 +112,6 @@ public class SecurityValve extends ValveBase {
 					queryString="?"+queryString;
 				} else {
 					queryString="";
-				}
-				if (c.isEnableSTS()) {
-					resp.setHeader("Strict-Transport-Security", c.getSTSParameters());
 				}
 				resp.sendRedirect("https://"+serverName+requestURI+queryString);
 			} else {

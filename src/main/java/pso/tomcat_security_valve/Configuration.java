@@ -23,7 +23,9 @@ public class Configuration {
 	
 	private boolean allowOnlySecureConnections;
 	private boolean redirectInsecureGETRequests;
+	
 	private boolean enableSTS;
+	private boolean STSHttpOnly;
 	private String sTSParameters;
 	
 	private boolean debug;
@@ -59,6 +61,7 @@ public class Configuration {
 			c.enableIpRestrictedContexts="true".equals(prop.getProperty("enableIpRestrictedContexts"));
 			c.enableReloadConfig="true".equals(prop.getProperty("enableReloadConfig"));
 			c.enableSTS="true".equals(prop.getProperty("enableSTS"));
+			c.STSHttpOnly="true".equals(prop.getProperty("STSHttpOnly"));
 			c.sTSParameters=prop.getProperty("STSParameters");
 			if (c.sTSParameters==null) c.sTSParameters="max-age=31536000; includeSubDomains; preload";
 
@@ -217,6 +220,10 @@ public class Configuration {
 
 	public boolean isEnableSTS() {
 		return enableSTS;
+	}
+	
+	public boolean isSTSHttpOnly() {
+		return STSHttpOnly;
 	}
 
 	public String getSTSParameters() {
