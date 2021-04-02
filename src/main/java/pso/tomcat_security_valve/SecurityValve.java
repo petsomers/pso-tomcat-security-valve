@@ -1,6 +1,7 @@
 package pso.tomcat_security_valve;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -86,11 +87,20 @@ public class SecurityValve extends ValveBase {
 			}
 		}
 		
+		HashSet<String> headerAlreadySet=new HashSet<>();
+		// AddHeaderContexts are sorted descendingly
+		// deeper levels will appear first
 		if (c.getAddHeaderContexts().size()>0) {
 			for (String ctx:c.getAddHeaderContexts()) {
 				if (requestURI.startsWith(ctx)) {
 					for (HeaderValue h:c.getAddHeadersForContext().get(ctx)) {
-						resp.addHeader(h.getHeader(), h.getValue());
+						// check if header is already set 
+						if (!headerAlreadySet.contains(h.getHeader())) {
+							// a header value that is "", will clear the headers from a parent path
+							if (!"".equals(h.getValue())) resp.addHeader(h.getHeader(), h.getValue());
+							headerAlreadySet.add(h.getHeader());
+						}
+						
 					}
 				}
 			}
